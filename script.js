@@ -175,6 +175,3 @@ $("#backspace").click(function(){
 $("#negate").click(function(){
   negate();
 });
-
-
-// TODO: keypress events
