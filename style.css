@@ -1,0 +1,50 @@
+body {
+  font-family: "Open Sans";
+  font-size: 22px;
+  color: white;
+  background: steelblue;
+}
+
+#calc {
+  background: rgb(75, 85, 85);
+  width: 400px;
+  table-layout: fixed;
+  margin: 60px auto 0 auto;
+}
+
+.display {
+  height: 60px;
+  text-align: right;
+  padding: 5px 20px 0 0;
+  font-size: 40px;
+  font-weight: 600;
+}
+
+#mem {
+  height: 30px;
+  font-size: 25px;
+}
+
+.key {
+  font-family: "Open Sans";
+  font-size: 22px;
+  color: white;
+  width: 100px;
+  height: 60px;
+  background: black;
+  text-align: center;
+  font-weight: 600;
+  vertical-align: middle;
+  display: table-cell;
+  border: 2px solid rgb(75, 85, 85);
+}
+
+.key.op {
+  font-weight: 400;
+}
+
+.key:hover {
+  background: rgb(75, 85, 85);
+  box-shadow: inset 0px 0px 0px 3px rgb(100, 120, 120);
+  transition: 0.1s;
+}
