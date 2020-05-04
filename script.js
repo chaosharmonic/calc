@@ -1,177 +1,148 @@
-var active = "";
-var stored = null;
-var end = false;
-var mode = null;
+let displayText = ''
+let storedValue = null
+let operating = true
+let currentOperation = null
 
-function digit(num){
-  if (end){
-    active = num;
-    end = false;
-  }
-  else if(active.length < 12){
-    active += num;
-  }
-  $("#input").text(active);
+// keys
+const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, '.']
+
+const operations = ['+', '-', '*', '/', '=']
+
+const functionKeys = ['c', 'ce', 'backspace', 'negate']
+
+const input = document.getElementById('input')
+const memory = document.getElementById('memory')
+
+const updateDisplayText = (target, text) => {
+  target.innerText = `${text}`
 }
 
-function negate(){
-  if (active[0] !== "-"){
-    active = "-" + active;
+const digit = (num) => {
+  const dupeDecimal = num === '.' && displayText.includes('.')
+  if (dupeDecimal) return null
+
+  if (!operating) {
+    displayText = num
+    operating = true
+  } else if (displayText.length < 12) {
+    displayText += num
   }
-  else {
-    active = active.split("");
-    active.shift();
-    active = active.join("");
-  }
-  $("#input").text(active);
+  updateDisplayText(input, displayText)
 }
 
+const negate = () => {
+  const isNegated = !displayText.startsWith('-')
+  displayText = isNegated
+    ? `-${displayText}`
+    : displayText.slice(1)
 
-function operator(op){
+  updateDisplayText(input, displayText)
+}
 
-  if (op !== "=") {
-    if (stored === null){
-      stored = Number(active);
-    }
-    else {
-      evaluate();
-    }
-    mode = op;
-    $("#mem").text(stored  + " " + mode);
-    ce();
+const backspace = () => {
+  const { length } = displayText
+  displayText = displayText.slice(0, length - 1)
+
+  updateDisplayText(input, displayText)
+}
+
+const ce = () => {
+  displayText = ''
+  updateDisplayText(input, displayText)
+}
+
+const clearMem = () => {
+  storedValue = null
+  currentOperation = null
+  ce()
+  updateDisplayText(memory, '')
+}
+
+const evaluate = () => {
+  if (!storedValue) return null
+  const num = Number(displayText)
+  switch (currentOperation) {
+    case '+':
+      storedValue += num
+      break
+    case '-':
+      storedValue -= num
+      break
+    case '*':
+      storedValue *= num
+      break
+    case '/':
+      storedValue /= num
+      break
   }
-  else {
-    if (!(active == 0 && mode == "/")){
-      evaluate();
-    }
-    if (stored !== null){
-      if (active == 0 && mode == "/"){
-        $("#input").text("DIV/0!");
-        $("#mem").text("");
-        setTimeout(function(){
-          clearMem();
-        }, 1500);
-      }
-      else{
-        active = stored;
-        if (String(active).length > 12) {
-          active = Number(String(active).slice(0,11));
-        }
-        $("#input").text(active);
-        stored = null;
-        $("#mem").text("");
-        mode = null;
-        end = true;
-      }
-    }
+  currentOperation = null
+  updateDisplayText(memory, storedValue)
+}
+
+const divByZeroError = () => {
+  updateDisplayText(input, 'DIV/0!')
+  updateDisplayText(memory, '')
+
+  setTimeout(function () {
+    clearMem()
+  }, 1500)
+}
+
+const finish = () => {
+  const divByZero = !Number(displayText) && currentOperation === '/'
+  divByZero
+    ? divByZeroError()
+    : evaluate()
+
+  if (storedValue && !divByZero) {
+    displayText = `${storedValue}`
+    if (displayText.length > 12) displayText = displayText.slice(0, 12)
+
+    updateDisplayText(input, displayText)
+    updateDisplayText(memory, '')
+    storedValue = null
+    operating = false
   }
 }
 
-function backspace() {
-  active = active.split("");
-  active.pop();
-  active = active.join("");
-  $("#input").text(active);
+const applyOperator = (operation) => {
+  if (operation !== '=') {
+    !storedValue ? storedValue = Number(displayText) : evaluate()
+    currentOperation = operation
+    updateDisplayText(memory, `${storedValue} ${currentOperation}`)
+    ce()
+  } else { finish() }
 }
 
-function ce(){
-  active = "";
-  $("#input").text("");
-}
-
-
-function clearMem(){
-  ce();
-  stored = null;
-  $("#mem").text("");
-  mode = null;
-}
-
-
-function evaluate(){
-  if (stored !== null){
-    active = Number(active);
-    switch (mode){
-      case "+":
-        stored += active;
-        break;
-      case "-":
-        stored -= active;
-        break;
-      case "*":
-        stored *= active;
-        break;
-      case "/":
-        stored /= active;
-        break;
-    }
+const handleFnKey = (fn) => {
+  switch (fn) {
+    case 'c':
+      clearMem()
+      break
+    case 'ce':
+      ce()
+      break
+    case 'backspace':
+      backspace()
+      break
+    case 'negate':
+      negate()
+      break
   }
-  mode = null;
-  $("#mem").text(stored);
 }
 
-$("#add").click(function(){
-  operator("+");
-});
-$("#subtract").click(function(){
-  operator("-");
-});
-$("#multiply").click(function(){
-  operator("*");
-});
-$("#divide").click(function(){
-  operator("/");
-});
-$("#equals").click(function(){
-  operator("=");
-});
+for (const n of numbers) {
+  const num = `${n}`
+  const key = document.getElementById(num)
+  key.addEventListener('click', () => digit(num))
+}
 
+for (const o of operations) {
+  const key = document.getElementById(o)
+  key.addEventListener('click', () => applyOperator(o))
+}
 
-$("#one").click(function(){
-  digit("1");
-});
-$("#two").click(function(){
-  digit("2");
-});
-$("#three").click(function(){
-  digit("3");
-});
-$("#four").click(function(){
-  digit("4");
-});
-$("#five").click(function(){
-  digit("5");
-});
-$("#six").click(function(){
-  digit("6");
-});
-$("#seven").click(function(){
-  digit("7");
-});
-$("#eight").click(function(){
-  digit("8");
-});
-$("#nine").click(function(){
-  digit("9");
-});
-$("#zero").click(function(){
-  digit("0");
-});
-$("#point").click(function(){
-  if(!(active.includes("."))){
-    digit(".");
-  }
-});
-
-$("#c").click(function(){
-  clearMem();
-});
-$("#ce").click(function(){
-  ce();
-});
-$("#backspace").click(function(){
-  backspace();
-});
-$("#negate").click(function(){
-  negate();
-});
+for (const f of functionKeys) {
+  const key = document.getElementById(f)
+  key.addEventListener('click', () => handleFnKey(f))
+}
