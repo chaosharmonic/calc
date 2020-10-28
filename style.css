@@ -1,11 +1,15 @@
+:root {
+  height: 100vh;
+}
+
 body {
   font-family: "Open Sans";
   font-size: 22px;
-  color: white;
-  background: black;
+  background: linear-gradient(130deg, rgb(11,100,225) 50%, rgb(9,121,84) 50%);
 }
 
 #calc {
+  color: white;
   background: rgb(75, 85, 85);
   width: 400px;
   margin: 60px auto 0 auto;
